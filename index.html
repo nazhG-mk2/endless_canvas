@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Endless Canvas Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @font-face {
+            font-family: 'Sohne Mono';
+            src: url('fonts/sohne-mono.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Sohne Mono', monospace;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='20' fill-opacity='0.2' fill='gray'>✚</text></svg>");
+            background-size: 150px 150px;
+        }
+
+        body {
+            font-family: Helvetica, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            height: 20vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        p {
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        #container {
+            width: 100dvw;
+            max-width: 100%;
+            height: 200vh;
+            position: relative;
+        }
+
+        canvas {
+            width: 100dvw;
+            height: 50vh;
+            position: sticky;
+            top: 0;
+        }
+
+        #cover {
+            width: 100vw;
+            position: fixed;
+            top: 100vh;
+            font-family: Helvetica, sans-serif;
+            font-size: 10vw;
+            font-weight: bold;
+            color: white;
+            -webkit-text-stroke: 1.5px black;
+            text-align: center;
+            margin: 0;
+            z-index: 10;
+
+            line-height: 0.75;
+            padding: 0;
+            margin: 0;
+            letter-spacing: 0;
+        }
+
+        .flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="flex">
+            <div></div>
+            <h1>Endless Canvas Scroll Animation</h1>
+            <!-- link a mi portafolio con un icono chulo nazhg.com -->
+            <a href="https://nazhg.com" target="_blank"
+                style="text-decoration: none; color: black; font-size: 1.5rem; margin-left: 1rem;">
+                👾
+            </a>
+        </div>
+        <p>
+            <i>
+                Just scroll down ...
+            </i>
+        </p>
+    </header>
+    <div id="container">
+        <h3 id="cover">HYPERCYCLE</h3>
+        <canvas id="canvas"></canvas>
+    </div>
+    <script>
+        const cover = document.getElementById('cover');
+        const container = document.getElementById('container');
+
+
+        const canvas = document.getElementById('canvas');
+        const dpr = window.devicePixelRatio || 1;
+
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const params = new URLSearchParams(window.location.search);
+        let valor = params.get('t');
+        if (valor && valor.length > 10) {
+            valor = valor.substring(0, 10);
+        }
+
+        // Ajustar texto
+        const text = valor || 'nazhG';
+        cover.innerText = text;
+        let fontSize = 10;
+        while (ctx.measureText(text).width < window.innerWidth && fontSize < 1000) {
+            fontSize++;
+            ctx.font = `bold ${fontSize}px Helvetica`;
+        }
+        cover.style.fontSize = `${fontSize - 3}px`;
+
+        let targetTop = 0;
+        let currentTop = 0;
+
+        function update() {
+            const rect = container.getBoundingClientRect();
+            const targetTop = rect.top;
+            currentTop += (targetTop - currentTop) * 0.4; // suaviza el movimiento
+            cover.style.top = `${currentTop}px`;
+            requestAnimationFrame(update);
+        }
+
+        update();
+
+        // Ajustar al tamaño final
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.strokeStyle = '#000';
+        ctx.fillStyle = '#fff';
+        ctx.lineWidth = 1.4;
+        ctx.font = `bold ${fontSize - 3}px Helvetica`;
+
+        const initialFontSize = fontSize;
+        const minFontSize = fontSize / 8;
+        const maxFontSize = fontSize * 1.5;
+
+        let y = 10 + (cover.offsetHeight / 2);
+
+        let lastScrollY = 0;
+        let lastTimestamp = null;
+
+        let move = 0;
+
+        let up = true;
+
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            const currentTimestamp = Date.now();
+
+            if (lastTimestamp) {
+                const deltaTime = currentTimestamp - lastTimestamp;
+                scrollSpeed = (currentScrollY - lastScrollY) / deltaTime;
+            }
+
+            // is scrool up ?
+            if (currentScrollY < lastScrollY) {
+                up = true;
+            }
+
+            lastScrollY = currentScrollY;
+            lastTimestamp = currentTimestamp;
+
+            if (currentScrollY + window.innerHeight >= document.body.scrollHeight) {
+                window.scrollTo({
+                    top: canvas.offsetTop + cover.offsetHeight,
+                    behavior: 'auto'
+                });
+                lastScrollY = 0
+                y = canvas.height;
+                up = false;
+            }
+            if (move < 30) {
+                move = + 2
+            }
+        })
+
+        let fontSizeFactor = -1;
+
+        setInterval(() => {
+            ctx.fillText(text, canvas.width / (2 * dpr), y / dpr);
+            ctx.strokeText(text, canvas.width / (2 * dpr), y / dpr);
+
+            if (up) {
+                fontSize = initialFontSize - 3;
+                y = 10 + (cover.offsetHeight / 2);
+                console.log(window.scrollY, lastScrollY);
+
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.putImageData(imageData, 0, move * 10);
+
+                if (move > 0) {
+                    move -= .1;
+                }
+                ctx.font = `bold ${fontSize}px Helvetica`;
+            } else if (move > 0) {
+                if (y >= cover.offsetTop) {
+                    y -= move * 10;
+                }
+                move -= .1;
+                if (fontSize > maxFontSize || fontSize < minFontSize) {
+                    fontSizeFactor *= -1;
+                }
+                fontSize += fontSizeFactor * move
+                ctx.font = `bold ${fontSize}px Helvetica`;
+            }
+        }, 25);
+    </script>
+
+</body>
+
+</html>
