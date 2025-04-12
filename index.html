@@ -28,6 +28,7 @@
         body {
             font-family: Helvetica, sans-serif;
             background-color: #f0f0f0;
+            min-height: 320px;
         }
 
         header {
@@ -42,6 +43,12 @@
             align-items: center;
             justify-content: center;
             font-size: 3rem;
+        }
+        /* media queri par el titulo */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
         }
 
         p {
@@ -114,7 +121,7 @@
         </p>
     </header>
     <div id="container">
-        <h3 id="cover">HYPERCYCLE</h3>
+        <h3 id="cover" style="visibility: hidden;">HYPERCYCLE</h3>
         <canvas id="canvas"></canvas>
     </div>
     <script>
@@ -182,6 +189,42 @@
         let move = 0;
 
         let up = true;
+
+        let startY = 0;
+
+window.addEventListener('touchstart', e => {
+  startY = e.touches[0].clientY;
+});
+
+// replica el evento touchend para el scroll
+window.addEventListener('touchend', e => {
+  const endY = e.changedTouches[0].clientY;
+  const deltaY = startY - endY;
+
+    if (deltaY > 0) {
+        window.scrollTo({
+        top: canvas.offsetTop + cover.offsetHeight,
+        behavior: 'auto'
+        });
+        lastScrollY = 0;
+        y = canvas.height;
+        up = false;
+    } else if (deltaY < 0) {
+        up = true;
+    }
+
+    // si estooy al final de la pagina
+    if (currentScrollY + window.innerHeight >= document.body.scrollHeight) {
+        window.scrollTo({
+            top: canvas.offsetTop + cover.offsetHeight,
+            behavior: 'auto'
+        });
+        lastScrollY = 0
+        y = canvas.height;
+        up = false;
+    }
+  
+});
 
         window.addEventListener('scroll', () => {
             const currentScrollY = window.scrollY;
