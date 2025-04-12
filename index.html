@@ -44,6 +44,7 @@
             justify-content: center;
             font-size: 3rem;
         }
+
         /* media queri par el titulo */
         @media (max-width: 600px) {
             h1 {
@@ -139,6 +140,8 @@
 
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
 
         const params = new URLSearchParams(window.location.search);
         let valor = params.get('t');
@@ -192,39 +195,24 @@
 
         let startY = 0;
 
-window.addEventListener('touchstart', e => {
-  startY = e.touches[0].clientY;
-});
-
-// replica el evento touchend para el scroll
-window.addEventListener('touchend', e => {
-  const endY = e.changedTouches[0].clientY;
-  const deltaY = startY - endY;
-
-    if (deltaY > 0) {
-        window.scrollTo({
-        top: canvas.offsetTop + cover.offsetHeight,
-        behavior: 'auto'
+        window.addEventListener('touchstart', e => {
+            startY = e.touches[0].clientY;
         });
-        lastScrollY = 0;
-        y = canvas.height;
-        up = false;
-    } else if (deltaY < 0) {
-        up = true;
-    }
 
-    // si estooy al final de la pagina
-    if (currentScrollY + window.innerHeight >= document.body.scrollHeight) {
-        window.scrollTo({
-            top: canvas.offsetTop + cover.offsetHeight,
-            behavior: 'auto'
+        // replica el evento touchend para el scroll
+        window.addEventListener('touchend', e => {
+            const endY = e.changedTouches[0].clientY;
+            const deltaY = startY - endY;
+
+            if (deltaY > 0) {
+                lastScrollY = 0;
+                y = canvas.height;
+                up = false;
+            } else if (deltaY < 0) {
+                up = true;
+            }
+
         });
-        lastScrollY = 0
-        y = canvas.height;
-        up = false;
-    }
-  
-});
 
         window.addEventListener('scroll', () => {
             const currentScrollY = window.scrollY;
